@@ -27,6 +27,12 @@ pipeline{
 
     stages{
 
+        stage('Init Pipeline') {
+            steps{
+                echo "Initializing pipeline with parameters:"
+            }
+        }
+
 
         stage("Start containers if it's not running") {
             when {
