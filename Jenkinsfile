@@ -54,15 +54,15 @@ pipeline{
                 expression { return params.run_ansible_playbook }
             }
 
-            dir('ansible'){
-                steps{
-                    withCredentials([file(credentialsId: 'ansible-vault-pass', variable: 'VAULT_PASS_FILE')]) {
+            steps{
+                withCredentials([file(credentialsId: 'ansible-vault-pass', variable: 'VAULT_PASS_FILE')]) {
                         // set -o pipefail ensure that all tasks in pipe are executed successfully
                         // very very verbose
+                    dir('ansible'){
                         sh "set -o pipefail; ansible-playbook -vvv -i ${ANSIBLE_INVENTORY_PATH} ${ANSIBLE_MASTER_PLAYBOOK} --vault-password-file \${VAULT_PASS_FILE} 2>&1 | tee ansible_output.log"
                     }
-                } 
-            }
+                }
+            } 
 
             post{
                 always {
