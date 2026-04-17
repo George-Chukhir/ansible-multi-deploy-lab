@@ -4,16 +4,20 @@
     hosts: app_servers
     roles:
       - nginx_backend
+    gather_facts: false 
 
 
   - name: Setup load balancer servers
     hosts: lb_servers
     roles:
       - nginx_loadbalancer
+    gather_facts: false
 
-  - name: Setup database servers
+  - name: Setup database servers  
     hosts: db_servers
     vars_files:
       - secrets.yml # we use vars from it
     roles:
       - nginx_database
+    gather_facts: false
+    
