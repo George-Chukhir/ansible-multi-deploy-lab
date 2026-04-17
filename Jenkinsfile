@@ -8,7 +8,7 @@ pipeline{
     }
 
     parameters {
-        booleanParam(name: 'start_docker_containers', defaultValue: true, description: 'Start docker containers if they are not running')
+        booleanParam(name: 'start_docker_containers', defaultValue: false, description: 'Start docker containers if they are not running')
         booleanParam(name: 'run_ansible_playbook', defaultValue: true, description: 'Run Ansible Playbook to configure the servers')
     }
 
