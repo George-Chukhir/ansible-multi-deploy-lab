@@ -1,5 +1,6 @@
 <img width="828" height="230" alt="image" src="https://github.com/user-attachments/assets/ee268c04-db48-473d-a318-0aac47d53572" />
-# Multi-Tier Web Infrastructure: Ansible & Docker Lab
+
+## Multi-Tier Web Infrastructure: Ansible & Docker Lab
 
 This repository contains an automated Infrastructure-as-Code (IaC) project for deploying a load-balanced web application environment. It uses **Ansible** for configuration management and **Jenkins** for continuous deployment.
 
