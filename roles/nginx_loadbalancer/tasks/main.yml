@@ -21,5 +21,5 @@
     template:
       src: lb.conf.j2
       dest: /etc/nginx/nginx.conf
-    validate: nginx -t -c %s # check conf syntax before deploying (changing the original one)   
+      validate: nginx -t -c %s # check conf syntax before deploying (changing the original one)   
     notify: Restart Nginx # call if conf was changed
