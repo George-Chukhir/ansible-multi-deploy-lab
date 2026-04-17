@@ -30,6 +30,7 @@ pipeline{
         stage('Init Pipeline') {
             steps{
                 echo "Initializing pipeline with parameters:"
+
             }
         }
 
