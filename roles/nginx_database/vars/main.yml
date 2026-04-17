@@ -1,0 +1,5 @@
+---
+# vars file for nginx_database
+
+  db_user: "webapp"
+  db_user_password: "{{ db_password }}"

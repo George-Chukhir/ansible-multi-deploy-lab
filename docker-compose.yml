@@ -1,0 +1,35 @@
+services:
+  app-01: 
+    build: .
+    container_name: app-01
+    networks:
+      - ansible-network
+
+  
+  app-02: 
+    build: .
+    container_name: app-02
+    networks:
+      - ansible-network
+
+
+  lb-01: 
+  # has to stay before webservers and send requests dividing the load between them
+    build: .
+    container_name: lb-01
+    networks:
+      - ansible-network
+    ports:
+      - "8888:80"
+    
+  db-01: 
+    build: .
+    container_name: db-01
+    networks:
+      - ansible-network
+
+
+networks:
+   ansible-network:
+    # don't need to specify driver, bcs default is bridge 
+    name: ansible-network

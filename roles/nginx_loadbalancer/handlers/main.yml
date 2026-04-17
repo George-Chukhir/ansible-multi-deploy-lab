@@ -1,0 +1,7 @@
+---
+# handlers file for nginx_loadbalancer
+
+- name: Restart Nginx # hook name
+  service: 
+    name: nginx
+    state: restarted  

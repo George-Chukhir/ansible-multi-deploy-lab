@@ -1,0 +1,19 @@
+--- 
+
+  - name: Setup backend servers
+    hosts: app_servers
+    roles:
+      - nginx_backend
+
+
+  - name: Setup load balancer servers
+    hosts: lb_servers
+    roles:
+      - nginx_loadbalancer
+
+  - name: Setup database servers
+    hosts: db_servers
+    vars_files:
+      - secrets.yml # we use vars from it
+    roles:
+      - nginx_database

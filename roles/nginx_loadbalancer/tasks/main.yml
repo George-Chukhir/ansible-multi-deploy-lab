@@ -1,0 +1,24 @@
+---
+# tasks file for nginx_loadbalancer
+
+  - name: Install nginx on load balancer servers
+    environment:
+      DEBIAN_FRONTEND: noninteractive # like shut up 
+    apt: 
+      name: nginx
+      state: present
+      update_cache: yes
+    register: nginx_lb_install
+    until: nginx_lb_install is success 
+    retries: 3
+    delay: 5
+      
+  - name: check registered variable
+    debug:
+      var: nginx_lb_install
+
+  - name: Deploy load balancer config
+    template:
+      src: lb.conf.j2
+      dest: /etc/nginx/nginx.conf
+    notify: Restart Nginx # call if conf was changed

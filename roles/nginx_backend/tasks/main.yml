@@ -1,0 +1,30 @@
+---
+# tasks file for nginx_backend
+# For remote servers
+
+  - name: Install nginx on web servers
+    apt:
+      name:
+        - nginx
+        - curl
+      state: present
+      update_cache: yes # apt-get update analog
+    register: nginx_web_install
+    until: nginx_web_install is success 
+    retries: 3
+    delay: 5
+      
+  - name: check registered variable
+    debug:
+      var: nginx_web_install
+
+  - name: Deploy index.html from template
+    template:
+      src: index.html.j2
+      dest: /var/www/html/index.html
+      validate: nginx -t -c %s # check conf syntax before deploying (changing the original one)   
+
+  - name: Ensure nginx is running on web servers
+    service:
+      name: nginx
+      state: started
