@@ -42,7 +42,10 @@ pipeline{
             }
 
             steps{
-                sh 'docker compose -p ${PROJECT_DIR} -f ${DOCKER_COMPOSE_FILE} up -d'
+                dir('deploy_local'){
+                    sh 'docker compose -p ${PROJECT_DIR} -f ${DOCKER_COMPOSE_FILE} up -d'
+                }
+
             }
         }
         
@@ -51,17 +54,19 @@ pipeline{
                 expression { return params.run_ansible_playbook }
             }
 
-            steps{
-                withCredentials([file(credentialsId: 'ansible-vault-pass', variable: 'VAULT_PASS_FILE')]) {
-                    // set -o pipefail ensure that all tasks in pipe are executed successfully
-                    // very very verbose
-                    sh "set -o pipefail; ansible-playbook -vvv -i ${ANSIBLE_INVENTORY_PATH} ${ANSIBLE_MASTER_PLAYBOOK} --vault-password-file \${VAULT_PASS_FILE} 2>&1 | tee ansible_output.log"
-                }
-            } 
+            dir('ansible'){
+                steps{
+                    withCredentials([file(credentialsId: 'ansible-vault-pass', variable: 'VAULT_PASS_FILE')]) {
+                        // set -o pipefail ensure that all tasks in pipe are executed successfully
+                        // very very verbose
+                        sh "set -o pipefail; ansible-playbook -vvv -i ${ANSIBLE_INVENTORY_PATH} ${ANSIBLE_MASTER_PLAYBOOK} --vault-password-file \${VAULT_PASS_FILE} 2>&1 | tee ansible_output.log"
+                    }
+                } 
+            }
 
             post{
                 always {
-                    archiveArtifacts artifacts: 'ansible_output.log', allowEmptyArchive: true
+                    archiveArtifacts artifacts: 'ansible/ansible_output.log', allowEmptyArchive: true
                 }
             }
         }
