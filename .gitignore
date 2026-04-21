@@ -1,1 +1,11 @@
 vault_pass
+
+// plugin folder 
+terraform/.terraform/
+
+// secrets
+terraform/*.tfstate
+terraform/*.tfstate.backup
+
+
+terraform/.terraform.lock.hcl
