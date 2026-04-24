@@ -5,7 +5,6 @@ resource "azurerm_virtual_network" "vnet" {
 
     location            = azurerm_resource_group.rg.location
     resource_group_name = azurerm_resource_group.rg.name
-
 }
 
 
@@ -16,5 +15,8 @@ resource "azurerm_subnet" "subnet" {
 
     address_prefixes     = ["10.0.1.0/24"] // 256 addresses, 254 for hosts
 }
+
+
+
 
 
