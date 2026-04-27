@@ -1,0 +1,18 @@
+---
+
+# A dynamic inventory file for Ansible that uses the Azure Resource Manager (Azure RM) plugin
+# to query Azure resources and generate an inventory based on resource groups.
+
+plugin: azure.azcollection.azure_rm
+
+include_vm_resource_groups:
+    # take value from RAM (jenkins)
+  - "{{ lookup('env', 'RG_NAME') }}"
+
+# creates roles (groups) based on tags
+keyed_groups:
+  - key: tags.role
+    prefix: role
+
+# Use Azure CLI for authentication
+auth_source: cli

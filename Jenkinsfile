@@ -2,19 +2,34 @@ pipeline{
     agent any
 
     environment {
-        DOCKER_COMPOSE_FILE = 'docker-compose.yml'
-        ANSIBLE_INVENTORY_PATH = 'inventories/local_docker/hosts.yml'
+        DOCKER_COMPOSE_FILE = 'deploy_local/docker-compose.yml'
+        ANSIBLE_INVENTORY_PATH = 'inventories/azure_rg/azure-rm.yaml'
         ANSIBLE_MASTER_PLAYBOOK = 'master_playbook.yml'
-        PROJECT_DIR = 'ansible_project'
+        // PROJECT_DIR = 'ansible_project' // deprecated
+
+
+        // pass pwd as env var (don't display as a started ps)
+        TF_VAR_db_admin_username = credentials('postgresql-admin-data').username
+        TF_VAR_db_admin_password = credentials('postgresql-admin-data').password
+
+
+        RG_NAME = ''
+        LB_PIP = ''
+        DB_FQDN = ''
+        VAULT_PASS_FILE = credentials('vault_pass')
+
     }
 
     parameters {
-        booleanParam(name: 'start_docker_containers', defaultValue: true, description: 'Start docker containers if they are not running')
+        booleanParam(name: 'run_terraform', defaultValue: true, description: 'Run Terraform to provision infrastructure')
         booleanParam(name: 'run_ansible_playbook', defaultValue: true, description: 'Run Ansible Playbook to configure the servers')
+        
+        // deprecated param
+        // booleanParam(name: 'start_docker_containers', defaultValue: true, description: 'Start docker containers if they are not running')
     }
 
     options {
-        timeout(time: 5, unit: 'MINUTES') 
+        timeout(time: 25, unit: 'MINUTES') 
 
         disableConcurrentBuilds()
 
@@ -36,40 +51,115 @@ pipeline{
         }
 
 
-        stage("Start containers if it's not running") {
+
+        stage('Deploy IaC with Terraform') {
             when {
-                expression { return params.start_docker_containers }
+                expression { return params.run_terraform }
             }
 
             steps{
-                dir('deploy_local'){
-                    sh 'docker compose -p ${PROJECT_DIR} -f ${DOCKER_COMPOSE_FILE} up -d'
+                dir('terraform'){
+                    echo "Running Terraform to provision infrastructure..."
+                    sh 'terraform init'
+                    
+                    script {
+                        retry(2) {
+                            try {
+                                sh 'set -o pipefail; terraform apply -auto-approve 2>&1 | tee terraform_output.log'
+                            }
+                            catch (err) {
+                                echo "Error during Terraform deployment: ${err}"
+                                error("Terraform deployment failed. Aborting pipeline.")
+                            }
+                        }
+                    }
+                    echo "Terraform deployment completed successfully."
                 }
+            }
 
+            post{
+                always{
+                    archiveArtifacts artifacts: 'terraform/terraform_output.log', allowEmptyArchive: true
+                }
+            }
+        }
+
+
+        // stage("Start containers if it's not running") {
+        //     when {
+        //         expression { return params.start_docker_containers }
+        //     }
+
+        //     steps{
+        //         dir('deploy_local'){
+        //             sh 'docker compose -p ${PROJECT_DIR} -f ${DOCKER_COMPOSE_FILE} up -d'
+        //         }
+
+        //     }
+        // }
+
+
+        stage('Parse outputs.tf'){
+            steps{
+                dir('terraform'){
+                    script {
+                        try {
+                            env.RG_NAME = sh(script: 'terraform output -raw resource_group_name', returnStdout: true).trim()
+                            env.LB_PIP = sh(script: 'terraform output -raw lb_public_ip', returnStdout: true).trim()
+                            env.DB_FQDN = sh(script: 'terraform output -raw db_fqdn', returnStdout: true).trim()
+                        }
+                        catch (err) {
+                            echo "Error retrieving Terraform output variables: ${err}"
+                            error("Failed to retrieve vars from \"outputs.tf\" . Aborting pipeline.")
+                        }
+                    }
+                }
+                echo "Parsed successfully"
             }
         }
         
+
+        stage('Install community.postgresql'){
+            steps{
+                dir('ansible'){
+                    sh 'ansible-galaxy collection install community.postgresql'
+                }
+            }
+        }
+
         stage('Run Ansible Playbook') {
             when {
                 expression { return params.run_ansible_playbook }
             }
 
-            steps{
-                withCredentials([file(credentialsId: 'ansible-vault-pass', variable: 'VAULT_PASS_FILE')]) {
-                        // set -o pipefail ensure that all tasks in pipe are executed successfully
-                        // very very verbose
+            steps{      
+                withCredentials([file(credentialsId: 'vault_pass', variable: 'VAULT_PASS_FILE')]) {
+                    // set -o pipefail ensure that all tasks in pipe are executed successfully
+                    // very very verbose
                     dir('ansible'){
-                        sh "set -o pipefail; ansible-playbook -vvv -i ${ANSIBLE_INVENTORY_PATH} ${ANSIBLE_MASTER_PLAYBOOK} --vault-password-file \${VAULT_PASS_FILE} 2>&1 | tee ansible_output.log"
+                        sh """
+                            set -o pipefail;
+                            ansible-playbook -vvv -i ${ANSIBLE_INVENTORY_PATH} ${ANSIBLE_MASTER_PLAYBOOK} \
+                            --vault-password-file ${VAULT_PASS_FILE} \
+                            -e "postgresql_db_fqdn=${DB_FQDN}" \
+                            -e "proxy_jump_host=${LB_PIP}" \
+                             2>&1 | tee ansible_output.log 
+                        """
                     }
                 }
-            } 
+            }
 
             post{
                 always {
                     archiveArtifacts artifacts: 'ansible/ansible_output.log', allowEmptyArchive: true
                 }
             }
-        }
+        } 
+
+
+
+
+
 
     }
 

@@ -1,37 +1,28 @@
 ---
 # tasks file for nginx_database
 
-  - name: Install postgresql on database servers
-    environment:
-      DEBIAN_FRONTEND: noninteractive # like shut up 
+  - name: Install PostgreSQL client libraries
+    become: true
     apt: 
       name: 
-          - postgresql
-          - postgresql-contrib
-          - python3-psycopg2 # driver for Ansible
-          - libpq-dev
-          - sudo
+        - python3-psycopg2 # necessary for postgresql_user 
+        - libpq-dev
+    state: present
+    update_cache: yes
+
+  - name: Login and create PostgreSQL user 
+
+    community.postgresql.postgresql_user:
+      login_host: "{{ postgresql_db_fqdn }}" # extra var from jenkins
+      login_user: "{{ postgresql_admin_username }}" # from group_vars/all.yml
+      login_password: "{{ postgresql_admin_password }}" # from group_vars/all.yml
+      port: "{{ db_port }}" # from defaults/main.yml
+
+
+      # create an new user
+      name: "{{ postgresql_user_username }}" # vars/main.yml
+      password: "{{ postgresql_user_password }}" # vault secrets.yaml
       state: present
-      update_cache: yes
-    register: postgresql_install
-    until: postgresql_install is success
-    retries: 3
-    delay: 5
 
+      no_log: true # don't log the password in ansible output
 
-  - name: Check registered variable
-    debug:
-      var: postgresql_install
-  
-  
-  - name: Ensure postgresql is started
-    service:
-      name: postgresql
-      state: started
-
-  - name: Create database user
-    become: true
-    become_user: postgres # ansible ignoring become_user if become is not set to true 
-    postgresql_user:
-      name: "{{ db_user }}"
-      password: "{{ db_user_password }}"

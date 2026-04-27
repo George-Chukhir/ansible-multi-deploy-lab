@@ -17,5 +17,29 @@ variable "vm_size" {
 }
 
 
+variable "web_app_count" {
+  type        = number
+  default     = 2
+  description = "Number of web application VMs to create."
+}
 
+variable "postgre_db_size" {
+  type       = string
+  default     = "B_Standard_B1ms"
+  description = "Size of the PostgreSQL database."
+}
+
+
+variable "db_admin_username" {
+  type       = string
+  description = "The username of the local administrator used for the PostgreSQL database."
+  sensitive   = true // will prevent displaying the value in logs, tfstate, etc.
+}
+
+
+variable "db_admin_password" {
+  type       = string
+  description = "The password of the local administrator used for the PostgreSQL database."
+  sensitive   = true
+}
 

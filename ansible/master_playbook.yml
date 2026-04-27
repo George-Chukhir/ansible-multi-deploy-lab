@@ -1,20 +1,21 @@
 --- 
 
   - name: Setup backend servers
-    hosts: app_servers
+    hosts: role_web-server
     roles:
       - nginx_backend
     gather_facts: false 
 
 
   - name: Setup load balancer servers
-    hosts: lb_servers
+    hosts: role_loadbalancer
     roles:
       - nginx_loadbalancer
     gather_facts: false
 
   - name: Setup database servers  
-    hosts: db_servers
+    # hosts: [prefix]_[tags.role]
+    hosts: role_postgresql-database
     vars_files:
       - secrets.yml # we use vars from it
     roles:

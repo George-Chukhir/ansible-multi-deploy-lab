@@ -46,9 +46,32 @@ resource "azurerm_network_interface" "web_app_nic"{
 
 
 
+// Prepare for DB
+
+resource "azurerm_private_dns_zone" "dns_zone" {
+    name = "${var.prefix}.postgres.database.azure.com"
+    resource_group_name = azurerm_resource_group.rg.name
+}
+
+
+resource "azurerm_private_dns_zone_virtual_network_link" "dns_link" {
+    name = "${var.prefix}-dns-link"
+    resource_group_name = azurerm_resource_group.rg.name
+    private_dns_zone_name = azurerm_private_dns_zone.dns_zone.name
+    virtual_network_id = azurerm_virtual_network.vnet.id
+    depends_on = [azurerm_subnet.db_subnet] // Ensure the subnet is created before linking the DNS zone
+}
+
+
+
 
 
 resource "azurerm_linux_virtual_machine" "lb_vm" {
+
+    tags = {
+        role = "loadbalancer"
+    }
+
     name = "${var.prefix}-lb-vm"
     location = azurerm_resource_group.rg.location
     resource_group_name = azurerm_resource_group.rg.name
@@ -83,7 +106,12 @@ resource "azurerm_linux_virtual_machine" "lb_vm" {
 
 
 resource "azurerm_linux_virtual_machine" "web_app_vm" {
-    count = 2
+
+    tags = {
+        role = "web-server"
+    }
+
+    count = var.web_app_count
     name = "${var.prefix}-web-app${count.index + 1}-vm"
     location = azurerm_resource_group.rg.location
     resource_group_name = azurerm_resource_group.rg.name
@@ -114,4 +142,31 @@ resource "azurerm_linux_virtual_machine" "web_app_vm" {
         version = "latest"
     }
 
+}
+
+
+
+resource "azurerm_postgresql_flexible_server" "postgresql_server" {
+
+    tags = {
+        role = "postgresql-database"
+    }
+
+    name = "${var.prefix}-postgresql-server"
+    location = azurerm_resource_group.rg.location
+    resource_group_name = azurerm_resource_group.rg.name
+    version = "12"
+
+    delegated_subnet_id = azurerm_subnet.db_subnet.id
+   
+    private_dns_zone_id = azurerm_private_dns_zone.dns_zone.id
+    public_network_access_enabled = false 
+
+    administrator_login = var.db_admin_username
+    administrator_password = var.db_admin_password    
+
+    storage_mb = 32768 // minimum for PostgreSQL Flexible Server
+
+    sku_name = var.postgre_db_size 
+    depends_on = [azurerm_private_dns_zone_virtual_network_link.dns_link] // Ensure the DNS zone is created before the PostgreSQL server]
 }

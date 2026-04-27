@@ -16,3 +16,18 @@ output "web_app_private_ips" {
 }
 
 
+output "web_app_count" {
+    value = var.web_app_count
+    description = "Number of web application VMs created"
+}
+
+output "db_fqdn" {
+    value = azurerm_postgresql_flexible_server.postgresql_server.fqdn
+    description = "Private IP address of the PostgreSQL database"
+}
+
+
+output "resource_group_name" {
+    value = azurerm_resource_group.rg.name
+    description = "Name of the resource group where all resources are created"
+}
