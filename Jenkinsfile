@@ -8,15 +8,11 @@ pipeline{
         // PROJECT_DIR = 'ansible_project' // deprecated
 
 
-        // pass pwd as env var (don't display as a started ps)
-        TF_VAR_db_admin_username = credentials('postgresql-admin-data').username
-        TF_VAR_db_admin_password = credentials('postgresql-admin-data').password
-
 
         RG_NAME = ''
         LB_PIP = ''
         DB_FQDN = ''
-        VAULT_PASS_FILE = credentials('vault_pass')
+        VAULT_PASS_FILE = credentials('vault_pass') 
 
     }
 
@@ -58,22 +54,30 @@ pipeline{
             }
 
             steps{
+
                 dir('terraform'){
                     echo "Running Terraform to provision infrastructure..."
                     sh 'terraform init'
                     
-                    script {
-                        retry(2) {
-                            try {
-                                sh 'set -o pipefail; terraform apply -auto-approve 2>&1 | tee terraform_output.log'
-                            }
-                            catch (err) {
-                                echo "Error during Terraform deployment: ${err}"
-                                error("Terraform deployment failed. Aborting pipeline.")
+                    withCredentials([ usernamePassword(
+                                        credentialsId: 'postgresql-admin-data', 
+                                        usernameVariable: 'TF_VAR_db_admin_username', // TF_VAR_ will be ignored by terraform, asigned to variables.tf -> db_admin_username
+                                        passwordVariable: 'TF_VAR_db_admin_password'
+                                    ) ]) {
+
+                        script {
+                            retry(2) {
+                                try {
+                                    sh 'set -o pipefail; terraform apply -auto-approve 2>&1 | tee terraform_output.log'
+                                }
+                                catch (err) {
+                                    echo "Error during Terraform deployment: ${err}"
+                                    error("Terraform deployment failed. Aborting pipeline.")
+                                }
                             }
                         }
+                        echo "Terraform deployment completed successfully."
                     }
-                    echo "Terraform deployment completed successfully."
                 }
             }
 
@@ -133,10 +137,13 @@ pipeline{
             }
 
             steps{      
-                withCredentials([file(credentialsId: 'vault_pass', variable: 'VAULT_PASS_FILE')]) {
+                withCredentials([file(credentialsId: 'vault_pass', variable: 'VAULT_PASS_FILE'), 
+                                 usernamePassword(credentialsId: 'postgresql-admin-data',
+                                 usernameVariable: 'DB_ADMIN_USER',
+                                 passwordVariable: 'DB_ADMIN_PASS')]) {
+                    dir('ansible'){
                     // set -o pipefail ensure that all tasks in pipe are executed successfully
                     // very very verbose
-                    dir('ansible'){
                         sh """
                             set -o pipefail;
                             ansible-playbook -vvv -i ${ANSIBLE_INVENTORY_PATH} ${ANSIBLE_MASTER_PLAYBOOK} \

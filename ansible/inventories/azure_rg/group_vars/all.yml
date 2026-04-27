@@ -5,6 +5,5 @@ ansible_user: azureuser
 
 ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
 
-postgresql_admin_username: "{{lookup('env', 'TF_VAR_db_admin_username') }}"
-postgresql_admin_password: "{{lookup('env', 'TF_VAR_db_admin_password') }}"
-
+postgresql_admin_username: "{{ lookup('env', 'DB_ADMIN_USER') }}"
+postgresql_admin_password: "{{ lookup('env', 'DB_ADMIN_PAAS') }}"
