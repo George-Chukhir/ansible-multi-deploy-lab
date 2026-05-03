@@ -7,7 +7,7 @@
       name: 
         - python3-psycopg2 # necessary for postgresql_user 
         - libpq-dev
-    state: present
+      state: present
     update_cache: yes
 
   - name: Login and create PostgreSQL user 
