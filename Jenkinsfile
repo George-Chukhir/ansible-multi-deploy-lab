@@ -130,7 +130,7 @@ pipeline{
             }
         }
         
-
+        // plugin for work with postgresql
         stage('Install community.postgresql'){
             steps{
                 dir('ansible'){
@@ -155,9 +155,9 @@ pipeline{
                         sh """
                             set -o pipefail;
                             ansible-playbook -vvv -i ${ANSIBLE_INVENTORY_PATH} ${ANSIBLE_MASTER_PLAYBOOK} \
-                            --vault-password-file ${VAULT_PASS_FILE} \
-                            -e "postgresql_db_fqdn=${DB_FQDN}" \
-                            -e "proxy_jump_host=${LB_PIP}" \
+                            --vault-password-file \${VAULT_PASS_FILE} \
+                            -e "postgresql_db_fqdn=${env.DB_FQDN}" \
+                            -e "proxy_jump_host=${env.LB_PIP}" \
                              2>&1 | tee ansible_output.log 
                         """
                     }
