@@ -1,5 +1,3 @@
----
-
 # A dynamic inventory file for Ansible that uses the Azure Resource Manager (Azure RM) plugin
 # to query Azure resources and generate an inventory based on resource groups.
 

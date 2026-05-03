@@ -6,7 +6,7 @@ pipeline{
 
     environment {
         DOCKER_COMPOSE_FILE = 'deploy_local/docker-compose.yml'
-        ANSIBLE_INVENTORY_PATH = 'inventories/azure_rg/azure-rm.yaml'
+        ANSIBLE_INVENTORY_PATH = 'inventories/azure_rg/azure-rm.yml'
         ANSIBLE_MASTER_PLAYBOOK = 'master_playbook.yml'
         // PROJECT_DIR = 'ansible_project' // deprecated
         AZURE_CONFIG_DIR = '/var/jenkins_home/.azure'
@@ -199,7 +199,7 @@ pipeline{
 
     post{
         always {
-            DeleteDir() // Clean up the Jenkins workspace after the build
+            deleteDir() // Clean up workspace after build
         }
         success {
             echo 'Pipeline finished successfully.'
