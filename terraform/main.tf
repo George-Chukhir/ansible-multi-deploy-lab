@@ -15,7 +15,7 @@ terraform {
         storage_account_name = "tfstatechukhir"
         container_name       = "tfstatecontainer"
         key                  = "terraform.tfstate" // name of the file in cloud storage 
-
+    }
 }
 
 // configure the provider 

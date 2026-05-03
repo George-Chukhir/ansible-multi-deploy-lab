@@ -200,7 +200,6 @@ pipeline{
     post{
         always {
             DeleteDir() // Clean up the Jenkins workspace after the build
-
         }
         success {
             echo 'Pipeline finished successfully.'
