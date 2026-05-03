@@ -32,7 +32,7 @@ output "resource_group_name" {
     description = "Name of the resource group where all resources are created"
 }
 
-output "storage_account_name" {
-    value = azurerm_storage_account.storage_account.name
-    description = "Name of the storage account created"
-}
+# output "storage_account_name" {
+#     value = azurerm_storage_account.storage_account.name
+#     description = "Name of the storage account created"
+# }
