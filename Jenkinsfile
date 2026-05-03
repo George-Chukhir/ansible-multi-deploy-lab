@@ -26,6 +26,7 @@ pipeline{
     parameters {
         booleanParam(name: 'run_terraform', defaultValue: true, description: 'Run Terraform to provision infrastructure')
         booleanParam(name: 'run_ansible_playbook', defaultValue: true, description: 'Run Ansible Playbook to configure the servers')
+        booleanParam(name: 'destroy_infrastructure', defaultValue: false, description: 'Destroy infrastructure after deployment')
         
         // deprecated param
         // booleanParam(name: 'start_docker_containers', defaultValue: true, description: 'Start docker containers if they are not running')
@@ -91,7 +92,6 @@ pipeline{
             post{
                 always{
                     archiveArtifacts artifacts: 'terraform/terraform_output.log', allowEmptyArchive: true
-                    CleanWs()
                 }
             }
         }
@@ -170,16 +170,38 @@ pipeline{
                 }
             }
         } 
+    }
 
+    stage('Destroy Infrastructure') {
+        when {
+            expression { return params.destroy_infrastructure }
+        }
 
-
-
-
-
+        steps{
+            dir('terraform') {
+                withCredentials([ 
+                    usernamePassword(
+                        credentialsId: 'postgresql-admin-data', 
+                        usernameVariable: 'TF_VAR_db_admin_username', 
+                        passwordVariable: 'TF_VAR_db_admin_password'
+                    ),
+                    string(credentialsId: 'id_rsa_pub', variable: 'TF_VAR_ssh_rsa_public_key')
+                ]) {
+                    catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                        sh 'terraform destroy -auto-approve'
+                    }
+                }
+            }
+        }
     }
 
 
+
     post{
+        always {
+            DeleteDir() // Clean up the Jenkins workspace after the build
+
+        }
         success {
             echo 'Pipeline finished successfully.'
         }

@@ -123,7 +123,7 @@ resource "azurerm_linux_virtual_machine" "web_app_vm" {
     // bind VM with network interface
     network_interface_ids = [azurerm_network_interface.web_app_nic[count.index].id]  
 
-    // add mine ssh key to have ability to connect to VM for me and Ansible 
+    // bind mine ssh key to have ability to connect to VM for me and Ansible 
     admin_ssh_key {
         username = "azureuser"
         public_key = var.ssh_rsa_public_key // path to your public SSH key
