@@ -85,7 +85,7 @@ resource "azurerm_linux_virtual_machine" "lb_vm" {
     // add mine ssh key to have ability to connect to VM for me and Ansible 
     admin_ssh_key {
         username = "azureuser"
-        public_key = file("~/.ssh/id_rsa.pub") // path to your public SSH key
+        public_key = var.ssh_rsa_public_key // path to your public SSH key
     }
 
     os_disk {
@@ -126,7 +126,7 @@ resource "azurerm_linux_virtual_machine" "web_app_vm" {
     // add mine ssh key to have ability to connect to VM for me and Ansible 
     admin_ssh_key {
         username = "azureuser"
-        public_key = file("~/.ssh/id_rsa.pub") // path to your public SSH key
+        public_key = var.ssh_rsa_public_key // path to your public SSH key
     }
 
     os_disk {

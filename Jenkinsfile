@@ -63,12 +63,12 @@ pipeline{
                     echo "Running Terraform to provision infrastructure..."
                     sh 'terraform init'
                     
-                    withCredentials([ usernamePassword(
-                                        credentialsId: 'postgresql-admin-data', 
+                    withCredentials([
+                                        string(credentialsId: 'id_rsa_pub', variable:'TF_VAR_ssh_rsa_public_key'), 
+                                        usernamePassword(credentialsId: 'postgresql-admin-data', 
                                         usernameVariable: 'TF_VAR_db_admin_username', // TF_VAR_ will be ignored by terraform, asigned to variables.tf -> db_admin_username
-                                        passwordVariable: 'TF_VAR_db_admin_password'
-                                    ) ]) {
-
+                                        passwordVariable: 'TF_VAR_db_admin_password'), 
+                                        ]) {
                         script {
                             retry(2) {
                                 try {
@@ -88,6 +88,7 @@ pipeline{
             post{
                 always{
                     archiveArtifacts artifacts: 'terraform/terraform_output.log', allowEmptyArchive: true
+                    CleanWs()
                 }
             }
         }
@@ -144,7 +145,7 @@ pipeline{
                 withCredentials([file(credentialsId: 'vault_pass', variable: 'VAULT_PASS_FILE'), 
                                  usernamePassword(credentialsId: 'postgresql-admin-data',
                                  usernameVariable: 'DB_ADMIN_USER',
-                                 passwordVariable: 'DB_ADMIN_PASS')]) {
+                                 passwordVariable: 'DB_ADMIN_PASS') ]) {
                     dir('ansible'){
                     // set -o pipefail ensure that all tasks in pipe are executed successfully
                     // very very verbose

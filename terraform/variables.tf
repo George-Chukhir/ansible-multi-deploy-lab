@@ -43,3 +43,7 @@ variable "db_admin_password" {
   sensitive   = true
 }
 
+variable "ssh_rsa_public_key"{
+  type       = string
+  description = "The public SSH key for accessing the VMs."
+}
