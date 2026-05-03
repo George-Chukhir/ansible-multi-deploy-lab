@@ -112,6 +112,7 @@ resource "azurerm_linux_virtual_machine" "web_app_vm" {
     }
 
     count = var.web_app_count
+    
     name = "${var.prefix}-web-app${count.index + 1}-vm"
     location = azurerm_resource_group.rg.location
     resource_group_name = azurerm_resource_group.rg.name

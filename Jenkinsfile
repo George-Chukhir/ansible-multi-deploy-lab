@@ -1,5 +1,8 @@
 pipeline{
     agent any
+    tools{
+        terraform 'terraform-1.14.9' //installed plugin and configured in Jenkins -> Tools
+    }
 
     environment {
         DOCKER_COMPOSE_FILE = 'deploy_local/docker-compose.yml'
@@ -15,6 +18,7 @@ pipeline{
         VAULT_PASS_FILE = credentials('vault_pass') 
 
     }
+
 
     parameters {
         booleanParam(name: 'run_terraform', defaultValue: true, description: 'Run Terraform to provision infrastructure')
@@ -48,7 +52,7 @@ pipeline{
 
 
 
-        stage('Deploy IaC with Terraform') {
+        stage('Deploy IaaC with Terraform') {
             when {
                 expression { return params.run_terraform }
             }

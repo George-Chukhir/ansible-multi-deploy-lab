@@ -5,5 +5,5 @@ ansible_user: azureuser
 
 ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
 
-postgresql_admin_username: "{{ lookup('env', 'DB_ADMIN_USER') }}"
-postgresql_admin_password: "{{ lookup('env', 'DB_ADMIN_PAAS') }}"
+postgresql_admin_username: "{{ lookup('env', 'DB_ADMIN_USER') }}" # vars from Jenkins environment
+postgresql_admin_password: "{{ lookup('env', 'DB_ADMIN_PASS') }}"

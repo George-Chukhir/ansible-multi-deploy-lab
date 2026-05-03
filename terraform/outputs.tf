@@ -23,7 +23,7 @@ output "web_app_count" {
 
 output "db_fqdn" {
     value = azurerm_postgresql_flexible_server.postgresql_server.fqdn
-    description = "Private IP address of the PostgreSQL database"
+    description = "Fully qualified domain name of the PostgreSQL database"
 }
 
 
