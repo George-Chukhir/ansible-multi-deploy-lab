@@ -170,25 +170,25 @@ pipeline{
                 }
             }
         } 
-    }
 
-    stage('Destroy Infrastructure') {
-        when {
-            expression { return params.destroy_infrastructure }
-        }
+        stage ('Destroy Infrastructure') {
+            when {
+                expression { return params.destroy_infrastructure }
+            }
 
-        steps{
-            dir('terraform') {
-                withCredentials([ 
-                    usernamePassword(
-                        credentialsId: 'postgresql-admin-data', 
-                        usernameVariable: 'TF_VAR_db_admin_username', 
-                        passwordVariable: 'TF_VAR_db_admin_password'
-                    ),
-                    string(credentialsId: 'id_rsa_pub', variable: 'TF_VAR_ssh_rsa_public_key')
-                ]) {
-                    catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                        sh 'terraform destroy -auto-approve'
+            steps{
+                dir('terraform') {
+                    withCredentials([ 
+                        usernamePassword(
+                            credentialsId: 'postgresql-admin-data', 
+                            usernameVariable: 'TF_VAR_db_admin_username', 
+                            passwordVariable: 'TF_VAR_db_admin_password'
+                        ),
+                        string(credentialsId: 'id_rsa_pub', variable: 'TF_VAR_ssh_rsa_public_key')
+                    ]) {
+                        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                            sh 'terraform destroy -auto-approve'
+                        }
                     }
                 }
             }
