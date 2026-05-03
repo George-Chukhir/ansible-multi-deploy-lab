@@ -9,6 +9,7 @@ pipeline{
         ANSIBLE_INVENTORY_PATH = 'inventories/azure_rg/azure-rm.yaml'
         ANSIBLE_MASTER_PLAYBOOK = 'master_playbook.yml'
         // PROJECT_DIR = 'ansible_project' // deprecated
+        AZURE_CONFIG_DIR = '/var/jenkins_home/.azure'
 
 
 
@@ -16,6 +17,8 @@ pipeline{
         LB_PIP = ''
         DB_FQDN = ''
         VAULT_PASS_FILE = credentials('vault_pass') 
+
+
 
     }
 
