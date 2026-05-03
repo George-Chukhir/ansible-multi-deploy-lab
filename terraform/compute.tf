@@ -170,4 +170,13 @@ resource "azurerm_postgresql_flexible_server" "postgresql_server" {
 
     sku_name = var.postgre_db_size 
     depends_on = [azurerm_private_dns_zone_virtual_network_link.dns_link] // Ensure the DNS zone is created before the PostgreSQL server]
+
+
+    // take init value and never change
+    lifecycle {
+        ignore_changes = [
+            zone, 
+            high_availability.0.standby_availability_zone
+        ]
+    }
 }
