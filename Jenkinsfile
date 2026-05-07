@@ -6,7 +6,7 @@ pipeline{
 
     environment {
         DOCKER_COMPOSE_FILE = 'deploy_local/docker-compose.yml'
-        ANSIBLE_INVENTORY_PATH = 'inventories/azure_rg/azure-rm.yaml'
+        ANSIBLE_INVENTORY_PATH = 'inventories/azure_rg/lab-dynamic-inventory.azure_rm.yaml'
         ANSIBLE_MASTER_PLAYBOOK = 'master_playbook.yml'
         // PROJECT_DIR = 'ansible_project' // deprecated
 
