@@ -6,10 +6,9 @@ pipeline{
 
     environment {
         DOCKER_COMPOSE_FILE = 'deploy_local/docker-compose.yml'
-        ANSIBLE_INVENTORY_PATH = 'inventories/azure_rg/azure-rm.yml'
+        ANSIBLE_INVENTORY_PATH = 'inventories/azure_rg/azure-rm.yaml'
         ANSIBLE_MASTER_PLAYBOOK = 'master_playbook.yml'
         // PROJECT_DIR = 'ansible_project' // deprecated
-        AZURE_CONFIG_DIR = '/var/jenkins_home/.azure'
 
 
 
@@ -19,6 +18,7 @@ pipeline{
         VAULT_PASS_FILE = credentials('vault_pass') 
 
 
+        AZURE_CONFIG_DIR = '/var/jenkins_home/.azure'
 
     }
 
