@@ -13,7 +13,7 @@ terraform {
     backend "azurerm" {
         resource_group_name  = "terraform_state-rg"
         storage_account_name = "tfstatechukhir"
-        container_name       = "tfstatecontainer"
+        container_name       = "my-lab-storage-container"
         key                  = "terraform.tfstate" // name of the file in cloud storage 
     }
 }
@@ -55,7 +55,7 @@ resource "azurerm_resource_group" "rg" {
 #     allow_nested_items_to_be_public = false
 # }
 
-# //create folder in it  
+# //create container in it  
 # resource "azurerm_storage_container" "tfstate_container" {
 #     name = "tfstate"
 #     storage_account_name = azurerm_storage_account.storage_account.name
