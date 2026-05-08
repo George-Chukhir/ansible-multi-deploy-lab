@@ -18,8 +18,6 @@ pipeline{
         VAULT_PASS_FILE = credentials('vault_pass') 
 
 
-        AZURE_CONFIG_DIR = '/var/jenkins_home/.azure'
-
         VENV_DIR="/var/jenkins_home/ansible-venv"
 
 
@@ -196,8 +194,16 @@ pipeline{
                             export ANSIBLE_INVENTORY_ANY_UNPARSED_IS_FAILED=True
                             export ANSIBLE_HOST_PATTERN_MISMATCH=error
 
+                            export HOME="/var/jenkins_home"
+                            export AZURE_CONFIG_DIR="/var/jenkins_home/.azure"
+
                             #show to system where to find AZURE CLI
                             export PATH="/var/jenkins_home/ansible-venv/bin:\$PATH"
+
+
+                            echo "CHECKING AZURE CLI AUTHENTICATION..."
+                            az account show || { echo "Keys not found or expired!"; exit 1; }
+                            echo "=== KEYS FOUND, RUNNING ANSIBLE ==="
 
                             ${env.VENV_DIR}/bin/ansible-playbook -vvv -i ${ANSIBLE_INVENTORY_PATH} ${ANSIBLE_MASTER_PLAYBOOK} \
                             --vault-password-file \${VAULT_PASS_FILE} \
