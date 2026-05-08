@@ -20,6 +20,9 @@ pipeline{
 
         AZURE_CONFIG_DIR = '/var/jenkins_home/.azure'
 
+        VENV_DIR="/var/jenkins_home/ansible-venv"
+
+
     }
 
 
@@ -47,16 +50,45 @@ pipeline{
 
     stages{
 
-        stage('Init Pipeline') {
+        stage('PrepareVirtual Environment') {
             steps{
-                echo "Initializing pipeline with parameters:"
+                sh '''
+                    set -e
 
+                    if [ ! -d "$VENV_DIR" ]; then
+                        echo "Virtual environment not found. Creating..."
+
+                        # call venv module to create virtual environment for ansible
+                        python3 -m venv "$VENV_DIR"
+
+                        # insgtall packages to venv
+                        $VENV_DIR/bin/pip install --upgrade pip
+                    fi
+
+                    if [ -f "ansible/requirements.txt" ]; then
+                        if [ -r "ansible/requirements.txt" ]; then
+                            echo "Installing Ansible dependencies from requirements.txt..."
+                            $VENV_DIR/bin/pip install -r ansible/requirements.txt  
+                        else
+                            echo "Error: requirements.txt is not readable. Please check file permissions." 
+                            exit 1
+                        fi
+                    fi
+                    if ! "$VENV_DIR/bin/ansible-galaxy" collection list | grep -q "azure.azcollection"; then
+                        # instructions for work with API azure
+                        echo "Virtual environment exists but Ansible Azure collection is not installed. Installing..."
+                        $VENV_DIR/bin/ansible-galaxy collection install azure.azcollection
+                    else 
+                        echo "Virtual environment and collection already exist. Skipping creation."
+                    fi
+
+                '''
             }
         }
 
 
 
-        stage('Deploy IaaC with Terraform') {
+        stage('Deploy IaC with Terraform') {
             when {
                 expression { return params.run_terraform }
             }
@@ -154,7 +186,7 @@ pipeline{
                     // very very verbose
                         sh """
                             set -o pipefail;
-                            ansible-playbook -vvv -i ${ANSIBLE_INVENTORY_PATH} ${ANSIBLE_MASTER_PLAYBOOK} \
+                            ${env.VENV_DIR}/bin/ansible-playbook -vvv -i ${ANSIBLE_INVENTORY_PATH} ${ANSIBLE_MASTER_PLAYBOOK} \
                             --vault-password-file \${VAULT_PASS_FILE} \
                             -e "postgresql_db_fqdn=${env.DB_FQDN}" \
                             -e "proxy_jump_host=${env.LB_PIP}" \
