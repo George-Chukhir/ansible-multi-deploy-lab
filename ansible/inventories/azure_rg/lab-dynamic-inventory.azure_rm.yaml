@@ -11,6 +11,3 @@ include_vm_resource_groups:
 keyed_groups:
   - key: tags.role
     prefix: role
-
-# Use Azure CLI for authentication
-auth_source: cli
