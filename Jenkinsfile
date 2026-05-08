@@ -197,7 +197,7 @@ pipeline{
                             export ANSIBLE_HOST_PATTERN_MISMATCH=error
 
                             #show to system where to find AZURE CLI
-                            export PATH="/var/jenkins_home/ansible-venv/bin:\$PATH"
+                            export PATH="/usr/bin:/var/jenkins_home/ansible-venv/bin:\$PATH"
 
 
                             echo "CHECKING AZURE CLI AUTHENTICATION..."

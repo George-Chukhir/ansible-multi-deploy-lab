@@ -1,4 +1,2 @@
 ansible==10.7.0
-azure-cli
-azure-cli-core
 packaging
