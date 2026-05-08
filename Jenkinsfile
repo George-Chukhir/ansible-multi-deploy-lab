@@ -174,6 +174,7 @@ pipeline{
             }
         }
 
+    
         stage('Run Ansible Playbook') {
             when {
                 expression { return params.run_ansible_playbook }
@@ -188,7 +189,16 @@ pipeline{
                     // set -o pipefail ensure that all tasks in pipe are executed successfully
                     // very very verbose
                         sh """
+                            set -e;
                             set -o pipefail;
+
+                            # protection from false positive results
+                            export ANSIBLE_INVENTORY_ANY_UNPARSED_IS_FAILED=True
+                            export ANSIBLE_HOST_PATTERN_MISMATCH=error
+
+                            #show to system where to find AZURE CLI
+                            export PATH="/var/jenkins_home/ansible-venv/bin:\$PATH"
+
                             ${env.VENV_DIR}/bin/ansible-playbook -vvv -i ${ANSIBLE_INVENTORY_PATH} ${ANSIBLE_MASTER_PLAYBOOK} \
                             --vault-password-file \${VAULT_PASS_FILE} \
                             -e "postgresql_db_fqdn=${env.DB_FQDN}" \
