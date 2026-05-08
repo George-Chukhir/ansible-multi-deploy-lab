@@ -11,6 +11,8 @@ pipeline{
         // PROJECT_DIR = 'ansible_project' // deprecated
 
 
+        HOME = "/var/jenkins_home"
+        AZURE_CONFIG_DIR = "/var/jenkins_home/.azure"
 
         RG_NAME = ''
         LB_PIP = ''
@@ -194,9 +196,6 @@ pipeline{
                             export ANSIBLE_INVENTORY_ANY_UNPARSED_IS_FAILED=True
                             export ANSIBLE_HOST_PATTERN_MISMATCH=error
 
-                            export HOME="/var/jenkins_home"
-                            export AZURE_CONFIG_DIR="/var/jenkins_home/.azure"
-
                             #show to system where to find AZURE CLI
                             export PATH="/var/jenkins_home/ansible-venv/bin:\$PATH"
 
@@ -209,7 +208,7 @@ pipeline{
                             --vault-password-file \${VAULT_PASS_FILE} \
                             -e "postgresql_db_fqdn=${env.DB_FQDN}" \
                             -e "proxy_jump_host=${env.LB_PIP}" \
-                             2>&1 | tee ansible_output.log 
+                            2>&1 | tee ansible_output.log 
                         """
                     }
                 }
