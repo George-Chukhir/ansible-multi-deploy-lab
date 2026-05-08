@@ -78,6 +78,9 @@ pipeline{
                         # instructions for work with API azure
                         echo "Virtual environment exists but Ansible Azure collection is not installed. Installing..."
                         $VENV_DIR/bin/ansible-galaxy collection install azure.azcollection
+                        
+                        #auto install all dependencies for azure collection
+                        $VENV_DIR/bin/pip install -r /var/jenkins_home/.ansible/collections/ansible_collections/azure/azcollection/requirements-azure.txt
                     else 
                         echo "Virtual environment and collection already exist. Skipping creation."
                     fi
