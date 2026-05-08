@@ -75,7 +75,7 @@ pipeline{
                         fi
                     fi
                     if ! "$VENV_DIR/bin/ansible-galaxy" collection list | grep -q "azure.azcollection"; then
-                        # instructions for work with API azure
+                        # instructions for proper work with API azure
                         echo "Virtual environment exists but Ansible Azure collection is not installed. Installing..."
                         $VENV_DIR/bin/ansible-galaxy collection install azure.azcollection
                         
