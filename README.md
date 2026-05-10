@@ -56,6 +56,6 @@ The decision was made to pivot to a **Terraform-rendered inventory**. This strat
 ### 1. Application Load Balancing
 The success of the deployment can be verified by querying the Load Balancer's public IP. The Nginx upstream configuration ensures a Round-Robin distribution between the private web servers.
 <img width="1064" height="151" alt="image" src="https://github.com/user-attachments/assets/41778c4b-d081-4f84-9e46-cba5de2b04e5" />
-
+### 2. Database Provisioning & Authentication
 Because the PostgreSQL Flexible Server is deployed within a private subnet without public access, verification must be performed from within the environment. Connecting via the Bastion Host (Load Balancer) confirms that Ansible successfully connected, decrypted the Vault secrets, and provisioned the required application users and roles
 <img width="1269" height="521" alt="image" src="https://github.com/user-attachments/assets/f3614a48-b67a-4d83-9fdf-cb3c0890fe91" />
