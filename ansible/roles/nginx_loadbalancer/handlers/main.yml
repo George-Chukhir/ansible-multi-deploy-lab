@@ -3,5 +3,6 @@
 
 - name: Restart Nginx # hook name
   service: 
+    become: true
     name: nginx
     state: restarted  
