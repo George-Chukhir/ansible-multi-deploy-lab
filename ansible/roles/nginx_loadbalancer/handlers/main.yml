@@ -2,7 +2,7 @@
 # handlers file for nginx_loadbalancer
 
 - name: Restart Nginx # hook name
+  become: true
   service: 
-    become: true
     name: nginx
     state: restarted  
