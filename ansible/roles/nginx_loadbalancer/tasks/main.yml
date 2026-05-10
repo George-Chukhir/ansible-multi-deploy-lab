@@ -25,3 +25,10 @@
       dest: /etc/nginx/nginx.conf
       validate: "nginx -t -c %s" # check conf syntax before deploying (changing the original one)   
     notify: Restart Nginx # call if conf was changed
+
+
+  - name: Ensure nginx is running and enabled
+    become: true
+    service:
+     name: nginx
+     state: restarted
