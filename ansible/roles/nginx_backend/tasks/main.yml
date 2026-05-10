@@ -3,8 +3,8 @@
 # For remote servers
 
   - name: Install nginx on web servers
+    become: true
     apt:
-      become: true
       name:
         - nginx
         - curl
