@@ -20,6 +20,7 @@
       var: nginx_web_install
 
   - name: Deploy index.html from template
+    become: true
     template:
       src: index.html.j2
       dest: /var/www/html/index.html
