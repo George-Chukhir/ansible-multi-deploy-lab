@@ -24,5 +24,5 @@
       password: "{{ postgresql_user_password }}" # vault secrets.yaml
       state: present
 
-      no_log: true # don't log the password in ansible output
+    no_log: true # don't log the password in ansible output
 
