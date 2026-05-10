@@ -21,5 +21,5 @@ all:
         ${ip}:
 %{ endfor ~}
       vars:
-        ansible_ssh_common_args: "-o ProxyJump=azureuser@${lb_public_ip}"
+        ansible_ssh_common_args: '-o StrictHostKeyChecking=no -o ProxyJump=azureuser@${lb_public_ip}'
     
