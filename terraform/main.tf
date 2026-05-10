@@ -33,6 +33,7 @@ resource "azurerm_resource_group" "rg" {
 
 
 // Code for creating storage account
+// We need to create SA before creating resource group, so did it separately 
 
 # resource "random_string" "storage_account_name" {
 #     length = 8
@@ -61,3 +62,15 @@ resource "azurerm_resource_group" "rg" {
 #     storage_account_name = azurerm_storage_account.storage_account.name
 #     container_access_type = "private"
 # }
+
+
+
+resource "local_file" "items_to_template" {
+    content = templatefile("${path.module}/inventory.yml.tmpl", 
+    {
+        lb_public_ip = azurerm_public_ip.lb_public_ip.ip_address,
+        web_app_private_ips = azurerm_network_interface.web_app_nic[*].private_ip_address,
+        db_fqdn = azurerm_postgresql_flexible_server.postgresql_server.fqdn
+    })
+    filename = "${path.module}/../ansible/inventories/azure_rg/hosts.yml"
+}

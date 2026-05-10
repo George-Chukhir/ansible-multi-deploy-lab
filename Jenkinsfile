@@ -6,7 +6,8 @@ pipeline{
 
     environment {
         DOCKER_COMPOSE_FILE = 'deploy_local/docker-compose.yml'
-        ANSIBLE_INVENTORY_PATH = 'inventories/azure_rg/lab-dynamic-inventory.azure_rm.yaml'
+        
+        ANSIBLE_INVENTORY_PATH = 'inventories/azure_rg/hosts.yml'
         ANSIBLE_MASTER_PLAYBOOK = 'master_playbook.yml'
         // PROJECT_DIR = 'ansible_project' // deprecated
 
@@ -68,23 +69,17 @@ pipeline{
                     if [ -f "ansible/requirements.txt" ]; then
                         if [ -r "ansible/requirements.txt" ]; then
                             echo "Installing Ansible dependencies from requirements.txt..."
-                            $VENV_DIR/bin/pip install -r ansible/requirements.txt  
+                            $VENV_DIR/bin/pip install -r ansible/requirements.txt
                         else
                             echo "Error: requirements.txt is not readable. Please check file permissions." 
                             exit 1
                         fi
                     fi
-                    if ! "$VENV_DIR/bin/ansible-galaxy" collection list | grep -q "azure.azcollection"; then
-                        # instructions for proper work with API azure
-                        echo "Virtual environment exists but Ansible Azure collection is not installed. Installing..."
-                        $VENV_DIR/bin/ansible-galaxy collection install azure.azcollection
-                        
-                        #auto install all dependencies for azure collection
-                        $VENV_DIR/bin/pip install -r /var/jenkins_home/.ansible/collections/ansible_collections/azure/azcollection/requirements-azure.txt
-                    else 
-                        echo "Virtual environment and collection already exist. Skipping creation."
+                    if [ -f "ansible/requirements.yml" ]; then
+                            echo "Installing Ansible dependencies from requirements.yml..."
+                            $VENV_DIR/bin/ansible-galaxy collection install -r ansible/requirements.yml
                     fi
-
+                    echo "Virtual environment already exist. Skipping creation."
                 '''
             }
         }
@@ -146,34 +141,6 @@ pipeline{
         // }
 
 
-        stage('Parse outputs.tf'){
-            steps{
-                dir('terraform'){
-                    script {
-                        try {
-                            env.RG_NAME = sh(script: 'terraform output -raw resource_group_name', returnStdout: true).trim()
-                            env.LB_PIP = sh(script: 'terraform output -raw lb_public_ip', returnStdout: true).trim()
-                            env.DB_FQDN = sh(script: 'terraform output -raw db_fqdn', returnStdout: true).trim()
-                        }
-                        catch (err) {
-                            echo "Error retrieving Terraform output variables: ${err}"
-                            error("Failed to retrieve vars from \"outputs.tf\" . Aborting pipeline.")
-                        }
-                    }
-                }
-                echo "Parsed successfully"
-            }
-        }
-        
-        // plugin for work with postgresql
-        stage('Install community.postgresql'){
-            steps{
-                dir('ansible'){
-                    sh 'ansible-galaxy collection install community.postgresql'
-                }
-            }
-        }
-
     
         stage('Run Ansible Playbook') {
             when {
@@ -192,22 +159,13 @@ pipeline{
                             set -e;
                             set -o pipefail;
 
-                            # protection from false positive results
                             export ANSIBLE_INVENTORY_ANY_UNPARSED_IS_FAILED=True
                             export ANSIBLE_HOST_PATTERN_MISMATCH=error
 
-                            #show to system where to find AZURE CLI
-                            export PATH="/usr/bin:/var/jenkins_home/ansible-venv/bin:\$PATH"
+                            export PATH="/var/jenkins_home/ansible-venv/bin:\$PATH"
 
-
-                            echo "CHECKING AZURE CLI AUTHENTICATION..."
-                            az account show || { echo "Keys not found or expired!"; exit 1; }
-                            echo "=== KEYS FOUND, RUNNING ANSIBLE ==="
-
-                            ${env.VENV_DIR}/bin/ansible-playbook -vvv -i ${ANSIBLE_INVENTORY_PATH} ${ANSIBLE_MASTER_PLAYBOOK} \
+                            ${VENV_DIR}/bin/ansible-playbook -vvv -i ${ANSIBLE_INVENTORY_PATH} ${ANSIBLE_MASTER_PLAYBOOK} \
                             --vault-password-file \${VAULT_PASS_FILE} \
-                            -e "postgresql_db_fqdn=${env.DB_FQDN}" \
-                            -e "proxy_jump_host=${env.LB_PIP}" \
                             2>&1 | tee ansible_output.log 
                         """
                     }

@@ -4,7 +4,8 @@
   - name: Install nginx on load balancer servers
     environment:
       DEBIAN_FRONTEND: noninteractive # like shut up 
-    apt: 
+    apt:
+      become: true 
       name: nginx
       state: present
       update_cache: yes

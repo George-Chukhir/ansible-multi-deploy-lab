@@ -1,3 +1,0 @@
----
-
-ansible_common_args: '-o ProxuJump=azureuser@{{proxy_jump_host}} -o StrictHostKeyChecking=no'

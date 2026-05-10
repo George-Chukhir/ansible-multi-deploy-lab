@@ -4,6 +4,7 @@
 
   - name: Install nginx on web servers
     apt:
+      become: true
       name:
         - nginx
         - curl

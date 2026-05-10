@@ -1,0 +1,25 @@
+all:
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+    ansible_connection: ssh
+    ansible_user: "azureuser"
+    ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+    postgresql_db_fqdn: "${db_fqdn}"
+
+  children:
+    role_postgresql-database:
+      hosts:
+        ${lb_public_ip}:  
+
+    role_loadbalancer:
+      hosts:
+        ${lb_public_ip}:
+
+    role_web-server:
+      hosts:
+%{ for ip in web_app_private_ips ~}
+        ${ip}:
+%{ endfor ~}
+      vars:
+        ansible_ssh_common_args: "-o ProxyJump=azureuser@${lb_public_ip}"
+    
