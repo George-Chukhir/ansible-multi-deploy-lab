@@ -18,10 +18,12 @@
       login_password: "{{ postgresql_admin_password }}" # from group_vars/all.yml
       port: "{{ db_port }}" # from defaults/main.yml
 
+      ssl_mode: require 
+      db: "{{ postgresql_db_name }}" # from defaults/main.yml
       # create an new user
       name: "{{ postgresql_user_username }}" # vars/main.yml
       password: "{{ postgresql_user_password }}" # vault secrets.yaml
       state: present
 
-#    no_log: true # don't log the password in ansible output
+    no_log: true # don't log the password in ansible output
 

@@ -2,3 +2,4 @@
 # defaults file for nginx_database
 
 db_port: 5432
+postgresql_db_name: "postgres"
