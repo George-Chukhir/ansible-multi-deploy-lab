@@ -151,13 +151,19 @@ pipeline{
                 withCredentials([file(credentialsId: 'vault_pass', variable: 'VAULT_PASS_FILE'), 
                                  usernamePassword(credentialsId: 'postgresql-admin-data',
                                  usernameVariable: 'DB_ADMIN_USER',
-                                 passwordVariable: 'DB_ADMIN_PASS') ]) {
+                                 passwordVariable: 'DB_ADMIN_PASS'),
+                                 sshUserPrivateKey(credentialsId: 'id_rsa', keyFileVariable: 'SSH_KEY_FILE')
+                                  ]) {
                     dir('ansible'){
                     // set -o pipefail ensure that all tasks in pipe are executed successfully
                     // very very verbose
+
+                    // Way of ssh key: get from Jenkins storage -> put into tmp file -> via --key-file give a path to tmp file to ansible -> then delete tmp 
                         sh """
                             set -e;
                             set -o pipefail;
+
+                            chmod 400 ${SSH_KEY_FILE}
 
                             export ANSIBLE_INVENTORY_ANY_UNPARSED_IS_FAILED=True
                             export ANSIBLE_HOST_PATTERN_MISMATCH=error
@@ -165,6 +171,7 @@ pipeline{
                             export PATH="/var/jenkins_home/ansible-venv/bin:\$PATH"
 
                             ${VENV_DIR}/bin/ansible-playbook -vvv -i ${ANSIBLE_INVENTORY_PATH} ${ANSIBLE_MASTER_PLAYBOOK} \
+                            --private-key ${SSH_KEY_FILE} \
                             --vault-password-file \${VAULT_PASS_FILE} \
                             2>&1 | tee ansible_output.log 
                         """
