@@ -165,6 +165,11 @@ pipeline{
 
                             chmod 400 ${SSH_KEY_FILE}
 
+                            #create local ssh agent to store ssh key for all ssh connections
+                            eval \$(ssh-agent -s)
+                            
+                            ssh-add ${SSH_KEY_FILE}
+
                             export ANSIBLE_INVENTORY_ANY_UNPARSED_IS_FAILED=True
                             export ANSIBLE_HOST_PATTERN_MISMATCH=error
 
