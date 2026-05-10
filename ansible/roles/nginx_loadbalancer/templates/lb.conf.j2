@@ -5,7 +5,7 @@ events {
 http {
 
     upstream app_servers {
-        {% for host in groups['app_servers'] %}
+        {% for host in groups['role_web-server'] %}
         server {{ host }}:80;
         {% endfor %}
     }
